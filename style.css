@@ -1,0 +1,26 @@
+/* Add any custom CSS you need here */
+* {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+a {
+    color: black;
+    text-decoration: none;
+}
+
+/* Column headers  */
+.fc-col-header-cell-cushion {
+    font-weight: bold;
+}
+
+/* Day cells, month grid */
+.fc-daygrid-day:hover {
+    cursor: pointer;
+    background-color: #dcdcdc;
+}
+
+/* Day cells, month grid: numbers */
+.fc-daygrid-day-number {
+    color: blue;
+    font-size: 20px;
+}
