@@ -204,16 +204,40 @@ document.addEventListener('DOMContentLoaded', function() {
             type: "POST",
             url: "events_data.php?action=add",
             data: getEventFormData(),
-            success: function (msg) {
-                // On success, display a success message and refresh the calendar
-                calendar.refetchEvents();
+            dataType: "json", // Add this line to parse response as JSON
+            success: function (response) {
+                if (response.success) {
+                    // On success, display a success message and refresh the calendar
+                    $("#successModalBody").html("<div class='alert alert-success'>" +
+                        "<i class='fa-solid fa-circle-check text-success'></i>" +
+                        "<span class='text-success fw-bold'> Event added successfully</span></div>");
+                    $("#successModal").modal("show");
+                    calendar.refetchEvents();
+                }
+                else {
+                    // On error, display the error message in the modal
+                    let errorMessage = "<div class='alert alert-danger'>" +
+                        "<i class='fa-solid fa-circle-xmark text-danger'></i>" +
+                        "<span class='text-danger fw-bold'> There was an error adding the event:</span><br>";
+                    for (let i = 0; i < response.errors.length; i++) {
+                        errorMessage += "• " + response.errors[i] + "<br>";
+                    }
+                    errorMessage += "</div>";
+
+                    $("#errorModalBody").html(errorMessage);
+                    $("#errorModal").modal("show");
+                }
             },
             error: function (error) {
-                // On error, display an error message
-                alert("There was an error adding the event: " + error.responseText);
-            },
+                // On other error, display a generic error message
+                $("#errorModalBody").html("<div class='alert alert-danger'>" +
+                    "<i class='fa-solid fa-circle-xmark text-danger'></i>" +
+                    "<span class='text-danger fw-bold'> There was an error adding the event</span></div>");
+                $("#errorModal").modal("show");
+            }
         });
     });
+
 
     // Save changes button click handler
     $("#editEventButton").click(function () {
@@ -224,16 +248,40 @@ document.addEventListener('DOMContentLoaded', function() {
             type: "POST",
             url: "events_data.php?action=edit",
             data: getEventFormData(),
-            success: function (msg) {
-                // On success, display a success message and refresh the calendar
-                calendar.refetchEvents();
+            dataType: "json", // Add this line to parse response as JSON
+            success: function (response) {
+                if (response.success) {
+                    // On success, display a success message and refresh the calendar
+                    $("#successModalBody").html("<div class='alert alert-success'>" +
+                        "<i class='fa-solid fa-circle-check text-success'></i>" +
+                        "<span class='text-success fw-bold'> Event edited successfully</span></div>");
+                    $("#successModal").modal("show");
+                    calendar.refetchEvents();
+                }
+                else {
+                    // On error, display the error message in the modal
+                    let errorMessage = "<div class='alert alert-danger'>" +
+                        "<i class='fa-solid fa-circle-xmark text-danger'></i>" +
+                        "<span class='text-danger fw-bold'> There was an error editing the event:</span><br>";
+                    for (let i = 0; i < response.errors.length; i++) {
+                        errorMessage += "• " + response.errors[i] + "<br>";
+                    }
+                    errorMessage += "</div>";
+
+                    $("#errorModalBody").html(errorMessage);
+                    $("#errorModal").modal("show");
+                }
             },
             error: function (error) {
-                // On error, display an error message
-                alert("There was an error editing the event: " + error.responseText);
-            },
+                // On other error, display a generic error message
+                $("#errorModalBody").html("<div class='alert alert-danger'>" +
+                    "<i class='fa-solid fa-circle-xmark text-danger'></i>" +
+                    "<span class='text-danger fw-bold'> There was an error editing the event</span></div>");
+                $("#errorModal").modal("show");
+            }
         });
     });
+
 
     // Resize Event button click handler
     $("#resizeEventButton").click(function () {
@@ -249,26 +297,51 @@ document.addEventListener('DOMContentLoaded', function() {
         calendar.changeView("timeGridWeek", startOfWeek);
     });
 
+
     // Delete Event button click handler
     $("#deleteEventButton").click(function () {
-        $("#eventForm").modal("hide"); // Close the modal
+        $("#eventForm").modal("hide");
+        $("#confirmDeleteModal").modal("show");
+    });
 
-        // Get the event ID from the hidden input field in the modal form
+
+    // Confirm Delete button click handler
+    $("#confirmDeleteButton").click(function () {
+        $("#confirmDeleteModal").modal("hide");
+
+        // Get the event ID
         let id = $("#id").val();
 
-        // Submit the event ID to events_data.php?action=delete using jQuery AJAX
+        // Submit the form data to delete the event
         $.ajax({
             type: "POST",
             url: "events_data.php?action=delete",
-            data: { id: id }, // Send the event ID as the data to be deleted
-            success: function (msg) {
-                // On success, refresh the calendar
-                calendar.refetchEvents(); // Refresh the calendar to remove the deleted event
+            data: { id: id },
+            dataType: 'json', // Add this line to parse response as JSON
+            success: function (response) {
+                if (response.success) {
+                    // On success, display a success message and refresh the calendar
+                    $("#successModalBody").html("<div class='alert alert-success'>" +
+                        "<i class='fa-solid fa-circle-check text-success'></i>" +
+                        "<span class='text-success fw-bold'> Event deleted successfully</span></div>");
+                    $("#successModal").modal("show");
+                    calendar.refetchEvents();
+                }
+                else {
+                    // On error, display the error message in the modal
+                    $("#errorModalBody").html("<div class='alert alert-danger'>" +
+                        "<i class='fa-solid fa-circle-xmark text-danger'></i>" +
+                        "<span class='text-danger fw-bold'>There was an unknown error deleting the event</span></div>");
+                    $("#errorModal").modal("show");
+                }
             },
             error: function (error) {
-                // On error, display an error message
-                alert("There was an error deleting the event: " + error.responseText);
-            },
+                // On other error, display a generic error message
+                $("#errorModalBody").html("<div class='alert alert-danger'>" +
+                    "<i class='fa-solid fa-circle-xmark text-danger'></i>" +
+                    "<span class='text-danger fw-bold'>There was an unknown error deleting the event</span></div>");
+                $("#errorModal").modal("show");
+            }
         });
     });
 
@@ -295,5 +368,10 @@ document.addEventListener('DOMContentLoaded', function() {
             backgroundColor: $("#backgroundColor").val(),
             textColor: $("#textColor").val()
         }
+    }
+
+    function displayErrorMessage(message) {
+        let errorEl = $("#errors");
+        errorEl.html("<div class='alert alert-danger' role='alert'>" + message + "</div>");
     }
 });

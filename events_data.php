@@ -34,26 +34,50 @@ if(isset($_GET["action"])){
             $backgroundColor = $_POST["backgroundColor"];
             $textColor = $_POST["textColor"];
 
-            // Prepare the SQL statement for inserting the event into the "events" table
-            $insertSql = /** @lang text */
-                "INSERT INTO events (title, start, end, description, backgroundColor, textColor) 
-                VALUES (:title, :start, :end, :description, :backgroundColor, :textColor)";
+            // Create an array to store error messages
+            $errors = array();
 
-            $insertStmt = $dbConnection->prepare($insertSql);
+            // Validate the event data
+            if (empty($title)) {
+                $errors[] = "Title is required";
+            }
+            if (empty($start)) {
+                $errors[] = "Start date and time field is required";
+            }
+            if (empty($end)) {
+                $errors[] = "End date and time field is required";
+            }
+            if ($start > $end) {
+                $errors[] = "Start date and time cannot be later than end date and time";
+            }
 
-            // Bind the parameters
-            $insertStmt->bindParam(":title", $title);
-            $insertStmt->bindParam(":start", $start);
-            $insertStmt->bindParam(":end", $end);
-            $insertStmt->bindParam(":description", $description);
-            $insertStmt->bindParam(":backgroundColor", $backgroundColor);
-            $insertStmt->bindParam(":textColor", $textColor);
+            // Check if there are any errors
+            if (empty($errors)) {
+                // Prepare the SQL statement for inserting the event into the "events" table
+                $insertSql = /** @lang text */
+                    "INSERT INTO events (title, start, end, description, backgroundColor, textColor) 
+                    VALUES (:title, :start, :end, :description, :backgroundColor, :textColor)";
 
-            // Execute the SQL statement to insert the event
-            $insertStmt->execute();
+                $insertStmt = $dbConnection->prepare($insertSql);
 
-            // Return the data as JSON
-            echo json_encode($insertStmt);
+                // Bind the parameters
+                $insertStmt->bindParam(":title", $title);
+                $insertStmt->bindParam(":start", $start);
+                $insertStmt->bindParam(":end", $end);
+                $insertStmt->bindParam(":description", $description);
+                $insertStmt->bindParam(":backgroundColor", $backgroundColor);
+                $insertStmt->bindParam(":textColor", $textColor);
+
+                // Execute the SQL statement to insert the event
+                $insertStmt->execute();
+
+                // Return success response
+                echo json_encode(array("success" => true));
+            }
+            else {
+                // Return the errors as a JSON response
+                echo json_encode(array("success" => false, "errors" => $errors));
+            }
 
             break;
 
@@ -66,36 +90,54 @@ if(isset($_GET["action"])){
             $start = $_POST["start"];
             $end = $_POST["end"];
             $description = $_POST["description"];
-            $textColor = $_POST["textColor"];
             $backgroundColor = $_POST["backgroundColor"];
+            $textColor = $_POST["textColor"];
 
-            // Prepare the SQL statement for updating the event in the "events" table
-            $updateSql = /** @lang text */
-                "UPDATE events SET 
-                title = :title, 
-                start = :start, 
-                end = :end, 
-                description = :description, 
-                textColor = :textColor, 
-                backgroundColor = :backgroundColor 
-                WHERE id = :id";
+            // Create an array to store error messages
+            $errors = array();
 
-            $updateStmt = $dbConnection->prepare($updateSql);
+            // Validate the event data
+            if (empty($title)) {
+                $errors[] = "Title is required";
+            }
+            if (empty($start)) {
+                $errors[] = "Start date and time field is required";
+            }
+            if (empty($end)) {
+                $errors[] = "End date and time field is required";
+            }
+            if ($start > $end) {
+                $errors[] = "Start date and time cannot be later than end date and time";
+            }
 
-            // Bind the parameters
-            $updateStmt->bindParam(":id", $id);
-            $updateStmt->bindParam(":title", $title);
-            $updateStmt->bindParam(":start", $start);
-            $updateStmt->bindParam(":end", $end);
-            $updateStmt->bindParam(":description", $description);
-            $updateStmt->bindParam(":textColor", $textColor);
-            $updateStmt->bindParam(":backgroundColor", $backgroundColor);
+            // Check if there are any errors
+            if (empty($errors)) {
+                // Prepare the SQL statement for updating the event in the "events" table
+                $updateSql = /** @lang text */
+                    "UPDATE events SET title = :title, start = :start, end = :end, description = :description, 
+                    backgroundColor = :backgroundColor, textColor = :textColor WHERE id = :id";
 
-            // Execute the SQL statement to update the event
-            $updateStmt->execute();
+                $updateStmt = $dbConnection->prepare($updateSql);
 
-            // Return the response as JSON
-            echo json_encode($updateStmt);
+                // Bind the parameters
+                $updateStmt->bindParam(":id", $id);
+                $updateStmt->bindParam(":title", $title);
+                $updateStmt->bindParam(":start", $start);
+                $updateStmt->bindParam(":end", $end);
+                $updateStmt->bindParam(":description", $description);
+                $updateStmt->bindParam(":backgroundColor", $backgroundColor);
+                $updateStmt->bindParam(":textColor", $textColor);
+
+                // Execute the SQL statement to update the event
+                $updateStmt->execute();
+
+                // Return success response
+                echo json_encode(array("success" => true));
+            }
+            else {
+                // Return the errors as a JSON response
+                echo json_encode(array("success" => false, "errors" => $errors));
+            }
 
             break;
 
@@ -164,22 +206,23 @@ if(isset($_GET["action"])){
 
 
         case "delete":
+            // Get the event ID from the POST request
             $id = $_POST["id"];
 
-            // Prepare the SQL statement to delete the event from the "events" table
+            // Prepare the SQL statement for deleting the event from the "events" table
             $deleteSql = /** @lang text */
                 "DELETE FROM events WHERE id = :id";
 
             $deleteStmt = $dbConnection->prepare($deleteSql);
 
+            // Bind the parameter
             $deleteStmt->bindParam(":id", $id);
 
             // Execute the SQL statement to delete the event
             $deleteStmt->execute();
 
-            // Return the response as JSON
-            echo json_encode($deleteStmt);
-
+            // Return success response
+            echo json_encode(array("success" => true));
             break;
 
 

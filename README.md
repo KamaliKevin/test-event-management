@@ -4,6 +4,7 @@ or download the libraries and put them inside the project folder. Libraries that
 are the following:</b></p>
 <ul>
     <li>Bootstrap</li>
+    <li>Font Awesome</li>
     <li>JQuery</li>
     <li>FullCalendar</li>
     <li>Moment JS</li>

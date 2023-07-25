@@ -24,3 +24,9 @@ a {
     color: blue;
     font-size: 20px;
 }
+
+/* Time cells, week grid */
+.fc-timegrid-slot-lane:hover {
+    cursor: pointer;
+    background-color: #dcdcdc;
+}
